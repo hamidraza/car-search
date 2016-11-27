@@ -69,7 +69,6 @@ app.use((req, res) => {
             <title>Car search app</title>
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700,800" rel="stylesheet">
-            <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
           </head>
           <body>
             <div id="app">${html}</div>

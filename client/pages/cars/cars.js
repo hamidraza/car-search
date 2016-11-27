@@ -4,7 +4,9 @@ import moment from 'moment';
 export class CarsPage extends Component {
 
   state = {
-    availableTypes: []
+    availableTypes: [],
+    sort: 'totalPrice',
+    order: 'asc'
   }
 
   constructor(props) {
@@ -74,13 +76,15 @@ export class CarsPage extends Component {
   }
 
   getCars() {
+    const totalHours = this.dateToValue.diff(this.dateFromValue, 'hour');
     let {cars} = this.context.store.getState();
+
     cars = cars.filter(c => {
       const {startDate, endDate} = c.availability;
       return this.dateFromValue.isBetween(startDate, endDate, null, '[]')
         && this.dateToValue.isBetween(startDate, endDate, null, '[]');
     });
-    const {filter} = this.state;
+    const {filter, sort, order} = this.state;
 
     if(filter.pickupDistance > 0) {
       cars = cars.filter(c => c.distanceKMS <= filter.pickupDistance);
@@ -88,7 +92,23 @@ export class CarsPage extends Component {
     if(filter.type) {
       cars = cars.filter(c => c.type == filter.type);
     }
-    // if(this.dateFromValue)
+
+    cars = cars.map(c => {
+      return {...c, totalPrice: totalHours*c.pricePerHour}
+    }).sort((n, o) => {
+      const nCol = n[sort],
+        oCol = o[sort];
+
+      if(order == 'asc') {
+        if(nCol > oCol) return 1;
+        if(nCol < oCol) return -1;
+      }else{
+        if(nCol < oCol) return 1;
+        if(nCol > oCol) return -1;
+      }
+      return 0;
+    });
+
     return cars;
   }
 
@@ -99,7 +119,6 @@ export class CarsPage extends Component {
   }
 
   handleDateToChange = e => {
-    console.log(e.target.value);
     const {filter} = this.state;
     filter.date.to = e.target.value? moment(e.target.value) : null;
     this.setState({filter});
@@ -123,6 +142,18 @@ export class CarsPage extends Component {
     this.setState({filter});
   }
 
+  handleOrderChange = e => {
+    this.setState({
+      order: this.state.order == 'asc' ? 'desc':'asc'
+    });
+  }
+
+  handleSortChange = e => {
+    this.setState({
+      sort: this.state.sort = e.target.value
+    });
+  }
+
 
   render() {
     const {filter, availableTypes} = this.state,
@@ -137,9 +168,12 @@ export class CarsPage extends Component {
       dateToMax
     } = this;
 
+
+    //Math.ceil(totalHours/60)
+
     return (
       <div className="page page-cars">
-        {/*Cars.map(c => 
+        {/*Cars.map(c =>
           <div key={c.id}>{c.brand}</div>
         )*/}
         <header className="main">
@@ -231,7 +265,7 @@ export class CarsPage extends Component {
               <label>Filter by type:</label>
               <select className="uc-f" onChange={this.handleFilterTypeChange} value={filter.type}>
                 <option value="">All</option>
-                {availableTypes.map(t => 
+                {availableTypes.map(t =>
                   <option value={t} key={t}>{t}</option>
                 )}
               </select>
@@ -243,8 +277,17 @@ export class CarsPage extends Component {
         <div className="list-body">
 
           <div className="container">
-            <h2>{Cars.length} Cars Available</h2>
-            {Cars.map(c => 
+            <div className="header">
+              <h2>{Cars.length} Cars Available</h2>
+              <div className="sort">
+                <select onChange={this.handleSortChange} value={this.state.sort}>
+                  <option value="totalPrice">Price</option>
+                  <option value="distanceKMS">Pickup distance</option>
+                </select>
+                <span className="sort-txt" onClick={this.handleOrderChange}>{this.state.order}</span>
+              </div>
+            </div>
+            {Cars.map(c =>
               <div className="car-box" key={c.id}>
                 <div className="car-img">
                   <img src={`/img/cars/${c.brand}-${c.model}.jpg`} alt=""/>
@@ -259,6 +302,9 @@ export class CarsPage extends Component {
                       <div>
                         <h3>{c.brand} {c.model}</h3>
                         <p>Transmission: <span className="uc-f">{c.transmission}</span>, {c.seater} Seater, {c.airBags || 'No'} air bags</p>
+                      </div>
+                      <div className="total-price">
+                        &#8377; {c.totalPrice} <small>.00</small>
                       </div>
                     </div>
                   </div>

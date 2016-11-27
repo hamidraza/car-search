@@ -152,7 +152,7 @@ header.main {
     margin-top: 10px;
 
     span {
-      // flex: 1; 
+      // flex: 1;
       width: 18px;
       height: 18px;
       text-align: center;
@@ -228,11 +228,21 @@ header.main {
 }
 
 .list-body {
-  h2 {
-    font-size: 18px;
-    font-weight: 600;
-    color: #606E6F;
+  .header {
+    display: flex;
+    align-items: center;
     margin: 40px 0 30px;
+    justify-content: space-between;
+
+    h2 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #606E6F;
+    }
+
+    .sort-txt {
+      cursor: pointer;
+    }
   }
   .car-box {
     margin-top: 15px;
@@ -287,6 +297,7 @@ header.main {
         flex: 1;
         display: flex;
         align-items: center;
+        justify-content: space-between;
       }
 
       h3 {
